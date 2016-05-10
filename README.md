@@ -1,4 +1,4 @@
-#  Lagom Service Locator and Service Registry for Consul
+#  Lagom Service Locator for Consul
 
 **DISCLAIMER: This is work in progress. This code has never been used in anger. Use it as a starting point and adapt it as-needed. I'd be happy to take pull requests.**
 
@@ -6,11 +6,11 @@ This project implements the [Lagom](http://lightbend.com/lagom) `ServiceLocator`
 
 ## Register service locator in Lagom
 
-To use it the first step is to register the service locator in Lagom by using Guice, see `ZooKeeperServiceLocatorModule`. It is enabled in the `reference.conf ` file:
+To use it the first step is to register the service locator in Lagom by using Guice, see `ConsulServiceLocatorModule`. It is enabled in the `reference.conf ` file:
 ```
 # Enables the `ConsulServiceLocatorModule` to register the `ConsulServiceLocator`.
 # The `ConsulServiceLocator` implements Lagom's ServiceLocator
-play.modules.enabled += "com.lightbend.lagom.discovery.zookeeper.ConsulServiceLocatorModule"
+play.modules.enabled += "com.lightbend.lagom.discovery.consul.ConsulServiceLocatorModule"
 ```
 
 This service locator is only enabled during `Prod` mode, during `Dev` mode the regular development service locator is used.
@@ -31,6 +31,7 @@ lagom {
 ```
 
 ## Register services in Consul
+
 The second step is to register each of your services in Consul. This can be done either directly using the [Consul Java API](https://github.com/Ecwid/consul-api) library. Here is some example code of how to use it in a service:
 
 ```java
