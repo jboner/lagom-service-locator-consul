@@ -1,0 +1,15 @@
+# sbt
+lib_managed
+project/project
+target
+
+# IntelliJ
+.idea
+
+# Ensime
+.ensime
+.ensime_lucene
+.ensime_cache/
+
+# Mac
+.DS_Store
