@@ -68,6 +68,7 @@ class ConsulServiceLocator @Inject()(implicit ec: ExecutionContext) extends Serv
   }
 
   private[consul] def pickRoundRobinInstance(name: String, services: List[CatalogService]): URI = {
+    assert(services.size > 1)
     roundRobinIndexFor.putIfAbsent(name, 0)
     val sortedServices = toURIs(services).sortWith(_.toString < _.toString)
     val currentIndex = roundRobinIndexFor(name)
