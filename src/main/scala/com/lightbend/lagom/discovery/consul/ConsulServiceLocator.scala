@@ -7,19 +7,24 @@ import java.util.concurrent.CompletionStage
 import java.util.function.{Function => JFunction}
 import javax.inject.Inject
 
-import com.ecwid.consul.v1.ConsulClient
+import com.ecwid.consul.v1.catalog.model.CatalogService
+import com.ecwid.consul.v1.{QueryParams, ConsulClient}
 import com.lightbend.lagom.javadsl.api.ServiceLocator
+import com.typesafe.config.ConfigException.BadValue
 import play.api.{Configuration, Environment, Mode}
 
+import scala.collection.JavaConversions._
 import scala.compat.java8.FutureConverters._
 import scala.compat.java8.OptionConverters._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Random
 
 class ConsulServiceLocator @Inject()(implicit ec: ExecutionContext) extends ServiceLocator {
 
   val config = Configuration.load(Environment(new File("."), getClass.getClassLoader, Mode.Prod)).underlying
   val hostname = config.getString("lagom.discovery.consul.hostname")
   val scheme = config.getString("lagom.discovery.consul.scheme")
+  val routing = config.getString("lagom.discovery.consul.routing")
 
   val client = new ConsulClient(hostname)
 
@@ -34,11 +39,17 @@ class ConsulServiceLocator @Inject()(implicit ec: ExecutionContext) extends Serv
     }.toJava
 
   private def locateAsScala(name: String): Future[Option[URI]] = Future {
-    // FIXME: use services or members?
-    val services = client.getAgentServices.getValue
-    if (services.containsKey(name)) {
-      val service = services.get(name)
-      Some(new URI(s"$scheme://${service.getAddress}:${service.getPort}"))
-    } else None
+    val services = client.getCatalogService(name, QueryParams.DEFAULT).getValue
+    val toURI = (service: CatalogService) => Some(new URI(s"$scheme://${service.getServiceAddress}:${service.getServicePort}"))
+    services.size match {
+      case 0    => None
+      case 1    => toURI(services.get(0))
+      case more =>
+        routing match {
+          case "first"       => toURI(services.sortWith(_.toString < _.toString).get(0))
+          case "random"      => toURI(services.sortWith(_.toString < _.toString).get(Random.nextInt(more - 1)))
+          case "round-robin" => toURI(services.sortWith(_.toString < _.toString).get(Random.nextInt(more - 1)))
+          case unknown       => throw new BadValue("lagom.discovery.consul.routing", s"[$unknown] is not a valid routing algorithm")
+    }
   }
 }

@@ -6,10 +6,10 @@ This project implements the [Lagom](http://lightbend.com/lagom) `ServiceLocator`
 
 ## Register service locator in Lagom
 
-To use it the first step is to register the service locator in Lagom by using Guice, see `ConsulServiceLocatorModule`. It is enabled in the `reference.conf ` file:
-```
-# Enables the `ConsulServiceLocatorModule` to register the `ConsulServiceLocator`.
-# The `ConsulServiceLocator` implements Lagom's ServiceLocator
+To use it the first step is to register the service locator in Lagom by using Guice, see `ConsulServiceLocatorModule`. It is enabled in the `reference.conf` file:
+```config
+# Enables the ConsulServiceLocatorModule to register the ConsulServiceLocator.
+# The ConsulServiceLocator implements Lagom's ServiceLocator
 play.modules.enabled += "com.lightbend.lagom.discovery.consul.ConsulServiceLocatorModule"
 ```
 
@@ -19,12 +19,12 @@ This service locator is only enabled during `Prod` mode, during `Dev` mode the r
 
 An `application.conf` file needs to be created in `src/main/resources` with the following contents:
 
-```
+```json
 lagom {
   discovery { 
     consul {
       hostname = "localhost"
-      scheme = "http"
+      scheme   = "http"
     }
   }
 }
@@ -32,7 +32,7 @@ lagom {
 
 ## Register services in Consul
 
-The second step is to register each of your services in Consul. This can be done either directly using the [Consul Java API](https://github.com/Ecwid/consul-api) library. Here is some example code of how to use it in a service:
+The second step is to register each of your services in Consul. This can be done using the [Consul Java API](https://github.com/Ecwid/consul-api) library or through Consul's [HTTP API](https://www.consul.io/intro/getting-started/services.html). Here is some example code of how to use it in a service:
 
 ```java
 import com.ecwid.consul.v1.ConsulClient;

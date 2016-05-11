@@ -10,7 +10,7 @@ import org.scalatest.Matchers
 import org.scalatest.WordSpecLike
 
 class ConsulServiceDiscoverySpec extends WordSpecLike with Matchers {
-  val testTimeoutInSeconds = 5
+  val testTimeoutInSeconds: Long = 5
 
   def withServiceDiscovery(testCode: ConsulServiceLocator => ConsulClient => Any): Unit = {
     import scala.concurrent.ExecutionContext.Implicits._
@@ -21,10 +21,10 @@ class ConsulServiceDiscoverySpec extends WordSpecLike with Matchers {
 
   "A Consul-based service locator" should {
     "allow lookup of a registered service" in withServiceDiscovery { locator => client =>
-      val service = new NewService
-      service.setName("service-1")
-      service.setPort(9001)
-      client.agentServiceRegister(service)
+      val service1 = new NewService
+      service1.setName("service-1")
+      service1.setPort(9001)
+      client.agentServiceRegister(service1)
 
       val registeredUrl = locator.locate("service-1").toCompletableFuture.get(
         testTimeoutInSeconds, TimeUnit.SECONDS
