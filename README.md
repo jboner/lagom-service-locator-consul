@@ -15,16 +15,24 @@ play.modules.enabled += "com.lightbend.lagom.discovery.consul.ConsulServiceLocat
 
 This service locator is only enabled during `Prod` mode, during `Dev` mode the regular development service locator is used.
 
+## Routing to service instances
+
+The `ConsulServiceLocator` has support for three simple routing policies: 
+* `first`: picks the first service instance in a sorted list—sorted by IP-address and port
+* `random`: picks a random service instance
+* `round-robin`: performs a round-robin routing between the currently available service instances
+
 ## Configuration
 
 An `application.conf` file needs to be created in `src/main/resources` with the following contents:
 
 ```json
 lagom {
-  discovery { 
+  discovery {
     consul {
-      hostname = "localhost"
-      scheme   = "http"
+      agent-hostname = "127.0.0.1"   # hostname or IP-address of a Consul agent
+      uri-scheme     = "http"        # for example: http or https
+      routing-policy = "round-robin" # valid routing policies: first, random, round-robin
     }
   }
 }
@@ -82,3 +90,10 @@ public class ExampleService {
 }
 ```
 
+## How to run the tests
+
+You need a Consul agent running on your local machine (on its default port) in order to run the tests. 
+
+If you are on Mac then you can install Consul through Homebrew using `brew install consul`. Once it is installed you can start up an agent in dev mode by invoking `consul agent -dev -data-dir ~/tmp` which will make an agent available on 127.0.0.1:8500.
+
+Once Consul is running you can run the tests by invoking `sbt test`.
