@@ -7,7 +7,7 @@ This project implements the [Lagom](http://lightbend.com/lagom) `ServiceLocator`
 ## Register service locator in Lagom
 
 To use it the first step is to register the service locator in Lagom by using Guice, see `ConsulServiceLocatorModule`. It is enabled in the `reference.conf` file:
-```config
+```
 # Enables the ConsulServiceLocatorModule to register the ConsulServiceLocator.
 # The ConsulServiceLocator implements Lagom's ServiceLocator
 play.modules.enabled += "com.lightbend.lagom.discovery.consul.ConsulServiceLocatorModule"
@@ -26,7 +26,7 @@ The `ConsulServiceLocator` has support for three simple routing policies:
 
 An `application.conf` file needs to be created in `src/main/resources` with the following contents:
 
-```json
+```
 lagom {
   discovery {
     consul {
