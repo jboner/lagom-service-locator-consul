@@ -14,6 +14,7 @@ play.modules.enabled += "com.lightbend.lagom.discovery.consul.ConsulServiceLocat
 ```
 
 This service locator is only enabled during `Prod` mode, during `Dev` mode the regular development service locator is used.
+When you are using this library then you should *not* use the `sbt-conductr` sbt plugin. 
 
 ## Routing to service instances
 
