@@ -30,7 +30,8 @@ An `application.conf` file needs to be created in `src/main/resources` with the 
 lagom {
   discovery {
     consul {
-      agent-hostname = "127.0.0.1"   # hostname or IP-address of a Consul agent
+      agent-hostname = "127.0.0.1"   # hostname or IP-address for the Consul agent
+      agent-port     = 8500          # port for the Consul agent
       uri-scheme     = "http"        # for example: http or https
       routing-policy = "round-robin" # valid routing policies: first, random, round-robin
     }

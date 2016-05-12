@@ -21,14 +21,18 @@ import scala.compat.java8.FutureConverters._
 import scala.compat.java8.OptionConverters._
 import scala.util.Random
 
-class ConsulServiceLocator @Inject()(implicit ec: ExecutionContext) extends ServiceLocator {
-
+object ConsulServiceLocator {
   val config = Configuration.load(Environment(new File("."), getClass.getClassLoader, Mode.Prod)).underlying
-  val hostname = config.getString("lagom.discovery.consul.agent-hostname")
-  val scheme = config.getString("lagom.discovery.consul.uri-scheme")
+  val agentHostname = config.getString("lagom.discovery.consul.agent-hostname")
+  val agentPort     = config.getInt("lagom.discovery.consul.agent-port")
+  val scheme        = config.getString("lagom.discovery.consul.uri-scheme")
   val routingPolicy = config.getString("lagom.discovery.consul.routing-policy")
+}
 
-  private val client = new ConsulClient(hostname)
+class ConsulServiceLocator @Inject()(implicit ec: ExecutionContext) extends ServiceLocator {
+  import ConsulServiceLocator._
+
+  private val client = new ConsulClient(agentHostname, agentPort)
   private val roundRobinIndexFor: Map[String, Int] = new ConcurrentHashMap[String, Int]().asScala
 
   override def locate(name: String): CompletionStage[Optional[URI]] =
@@ -42,15 +46,15 @@ class ConsulServiceLocator @Inject()(implicit ec: ExecutionContext) extends Serv
     }.toJava
 
   private def locateAsScala(name: String): Future[Option[URI]] = Future {
-    val services = client.getCatalogService(name, QueryParams.DEFAULT).getValue.toList
-    services.size match {
+    val instances = client.getCatalogService(name, QueryParams.DEFAULT).getValue.toList
+    instances.size match {
       case 0 => None
-      case 1 => Some(toURIs(services).get(0))
+      case 1 => toURIs(instances).headOption
       case _ =>
         routingPolicy match {
-          case "first"       => Some(pickFirstInstance(services))
-          case "random"      => Some(pickRandomInstance(services))
-          case "round-robin" => Some(pickRoundRobinInstance(name, services))
+          case "first"       => Some(pickFirstInstance(instances))
+          case "random"      => Some(pickRandomInstance(instances))
+          case "round-robin" => Some(pickRoundRobinInstance(name, instances))
           case unknown       => throw new BadValue("lagom.discovery.consul.routing-policy", s"[$unknown] is not a valid routing algorithm")
         }
     }
@@ -85,6 +89,6 @@ class ConsulServiceLocator @Inject()(implicit ec: ExecutionContext) extends Serv
       val serviceAddress =
         if (address == "" || address == "localhost") InetAddress.getLoopbackAddress.getHostAddress
         else address
-      new URI(s"$scheme://${serviceAddress}:${service.getServicePort}")
+      new URI(s"$scheme://$serviceAddress:${service.getServicePort}")
     }
 }
