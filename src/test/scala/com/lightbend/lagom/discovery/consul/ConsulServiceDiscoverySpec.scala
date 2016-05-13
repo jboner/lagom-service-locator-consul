@@ -10,15 +10,21 @@ import org.scalatest.Matchers
 import org.scalatest.WordSpecLike
 
 import scala.collection.JavaConversions._
+import com.typesafe.config.ConfigFactory
+import play.api.Configuration
+import play.api.Environment
+import scala.reflect.io.File
+import play.api.Mode
 
 class ConsulServiceDiscoverySpec extends WordSpecLike with Matchers {
+  val config = Configuration.load(Environment.simple())
   val testTimeoutInSeconds: Long = 5
   val localAddress = InetAddress.getLoopbackAddress.getHostAddress
 
   def withServiceDiscovery(testCode: ConsulServiceLocator => ConsulClient => Any): Unit = {
     import scala.concurrent.ExecutionContext.Implicits._
     val client = new ConsulClient("localhost")
-    val locator = new ConsulServiceLocator
+    val locator = new ConsulServiceLocator(client, new ConsulConfig.ConsulConfigImpl(config))
     testCode(locator)(client)
   }
 

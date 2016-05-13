@@ -1,7 +1,15 @@
 # sbt
-lib_managed
 project/project
 target
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
 
 # IntelliJ
 .idea
@@ -10,6 +18,13 @@ target
 .ensime
 .ensime_lucene
 .ensime_cache/
+
+# Eclipse
+.scala_dependencies
+.worksheet
+.classpath
+.project
+.target
 
 # Mac
 .DS_Store
