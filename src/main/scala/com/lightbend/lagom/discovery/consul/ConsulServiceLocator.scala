@@ -3,8 +3,9 @@ package com.lightbend.lagom.discovery.consul
 import java.net.InetAddress
 import java.net.URI
 import java.util.Optional
-import java.util.concurrent.CompletionStage
+import java.util.concurrent.{ThreadLocalRandom, CompletionStage}
 import java.util.function.{ Function => JFunction }
+import javax.inject.Inject
 
 import scala.collection.JavaConverters._
 import scala.collection.concurrent.Map
@@ -13,14 +14,12 @@ import scala.compat.java8.FutureConverters._
 import scala.compat.java8.OptionConverters._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import scala.util.{Random => JRandom}
 
 import com.ecwid.consul.v1.ConsulClient
 import com.ecwid.consul.v1.QueryParams
 import com.ecwid.consul.v1.catalog.model.CatalogService
-import com.lightbend.lagom.javadsl.api.ServiceLocator
 
-import javax.inject.Inject
+import com.lightbend.lagom.javadsl.api.ServiceLocator
 
 class ConsulServiceLocator @Inject()(client: ConsulClient, config: ConsulConfig)(implicit ec: ExecutionContext) extends ServiceLocator {
 
@@ -55,24 +54,24 @@ class ConsulServiceLocator @Inject()(client: ConsulClient, config: ConsulConfig)
   }
 
   private[consul] def pickFirstInstance(services: List[CatalogService]): URI = {
-    assert(services.nonEmpty)
+    if (services.isEmpty) throw new IllegalStateException("List of services should not be empty")
     toURIs(services).sorted.head
   }
 
   private[consul] def pickRandomInstance(services: List[CatalogService]): URI = {
-    assert(services.nonEmpty)
-    toURIs(services).sorted.apply(JRandom.nextInt(services.size - 1))
+    if (services.isEmpty) throw new IllegalStateException("List of services should not be empty")
+    toURIs(services).sorted.apply(ThreadLocalRandom.current.nextInt(services.size - 1))
   }
 
   private[consul] def pickRoundRobinInstance(name: String, services: List[CatalogService]): URI = {
-    assert(services.nonEmpty)
+    if (services.isEmpty) throw new IllegalStateException("List of services should not be empty")
     roundRobinIndexFor.putIfAbsent(name, 0)
     val sortedServices = toURIs(services).sorted
     val currentIndex = roundRobinIndexFor(name)
     val nextIndex =
       if (sortedServices.size > currentIndex + 1) currentIndex + 1
       else 0
-    roundRobinIndexFor += (name -> nextIndex)
+    roundRobinIndexFor.replace(name, nextIndex)
     sortedServices.apply(currentIndex)
   }
 
