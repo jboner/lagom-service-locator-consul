@@ -1,6 +1,6 @@
 #  Lagom Service Locator for Consul
 
-**DISCLAIMER: This is work in progress. This code has never been used in anger. Use it as a starting point and adapt it as-needed. I'd be happy to take pull requests.**
+**DISCLAIMER: This is work in progress. This code has never been used in anger. Use it as a starting point and adapt it as-needed. I'm happy to take pull requests.**
 
 This project implements the [Lagom](http://lightbend.com/lagom) `ServiceLocator` interface for [Consul](https://www.consul.io) and provides a Consul-based service registry for registering and unregistering service from within the services.
 
