@@ -5,9 +5,10 @@ import play.api.{Configuration, Environment, Mode}
 import play.api.inject.{Binding, Module}
 
 import javax.inject.Singleton
-import com.ecwid.consul.v1.ConsulClient
 import javax.inject.Inject
 import javax.inject.Provider
+
+import com.ecwid.consul.v1.ConsulClient
 
 /**
  * This module binds the ServiceLocator interface from Lagom to the `ConsulServiceLocator`.

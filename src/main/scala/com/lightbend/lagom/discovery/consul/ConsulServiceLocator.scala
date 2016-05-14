@@ -6,7 +6,7 @@ import java.util.Optional
 import java.util.concurrent.CompletionStage
 import java.util.function.{ Function => JFunction }
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.concurrent.Map
 import scala.collection.concurrent.TrieMap
 import scala.compat.java8.FutureConverters._
@@ -19,7 +19,6 @@ import com.ecwid.consul.v1.ConsulClient
 import com.ecwid.consul.v1.QueryParams
 import com.ecwid.consul.v1.catalog.model.CatalogService
 import com.lightbend.lagom.javadsl.api.ServiceLocator
-import com.typesafe.config.ConfigException.BadValue
 
 import javax.inject.Inject
 
@@ -38,7 +37,7 @@ class ConsulServiceLocator @Inject()(client: ConsulClient, config: ConsulConfig)
     }.toJava
 
   private def locateAsScala(name: String): Future[Option[URI]] = Future {
-    val instances = client.getCatalogService(name, QueryParams.DEFAULT).getValue.toList
+    val instances = client.getCatalogService(name, QueryParams.DEFAULT).getValue.asScala.toList
     instances.size match {
       case 0 => None
       case 1 => toURIs(instances).headOption
@@ -62,7 +61,7 @@ class ConsulServiceLocator @Inject()(client: ConsulClient, config: ConsulConfig)
 
   private[consul] def pickRandomInstance(services: List[CatalogService]): URI = {
     assert(services.nonEmpty)
-    toURIs(services).sorted.get(JRandom.nextInt(services.size - 1))
+    toURIs(services).sorted.apply(JRandom.nextInt(services.size - 1))
   }
 
   private[consul] def pickRoundRobinInstance(name: String, services: List[CatalogService]): URI = {
@@ -74,7 +73,7 @@ class ConsulServiceLocator @Inject()(client: ConsulClient, config: ConsulConfig)
       if (sortedServices.size > currentIndex + 1) currentIndex + 1
       else 0
     roundRobinIndexFor += (name -> nextIndex)
-    sortedServices.get(currentIndex)
+    sortedServices.apply(currentIndex)
   }
 
   private def toURIs(services: List[CatalogService]): List[URI] =
