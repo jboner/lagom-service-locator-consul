@@ -20,6 +20,7 @@ class ConsulServiceLocatorModule extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
     if (environment.mode == Mode.Prod) Seq(
       bind[ServiceLocator].to[ConsulServiceLocator].in[Singleton],
+      bind[ConsulConfig].to[ConsulConfig.ConsulConfigImpl],
       bind[ConsulClient].toProvider[ConsulServiceLocatorModule.ConsulClientProvider]
     )
     else Seq.empty
