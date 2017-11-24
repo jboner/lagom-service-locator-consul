@@ -96,6 +96,6 @@ public class ExampleService {
 
 You need a Consul agent running on your local machine (on its default port) in order to run the tests. 
 
-If you are on Mac then you can install Consul through Homebrew using `brew install consul`. Once it is installed you can start up an agent in dev mode by invoking `consul agent -dev -data-dir ~/tmp` which will make an agent available on 127.0.0.1:8500.
+If you are on Mac then you can install Consul through Homebrew using `brew install consul` or using docker `docker run -p8500:8500 consul`. Once it is installed you can start up an agent in dev mode by invoking `consul agent -dev -data-dir ~/tmp` which will make an agent available on 127.0.0.1:8500.
 
 Once Consul is running you can run the tests by invoking `sbt test`.
