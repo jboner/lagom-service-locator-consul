@@ -3,8 +3,8 @@ package com.lightbend.lagom.discovery.consul
 import java.net.InetAddress
 import java.net.URI
 import java.util.Optional
-import java.util.concurrent.{ThreadLocalRandom, CompletionStage}
-import java.util.function.{ Function => JFunction }
+import java.util.concurrent.{CompletionStage, ThreadLocalRandom}
+import java.util.function.{Function => JFunction}
 import javax.inject.Inject
 
 import scala.collection.JavaConverters._
@@ -14,26 +14,34 @@ import scala.compat.java8.FutureConverters._
 import scala.compat.java8.OptionConverters._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-
 import com.ecwid.consul.v1.ConsulClient
 import com.ecwid.consul.v1.QueryParams
+import com.ecwid.consul.v1.agent.model.NewService
 import com.ecwid.consul.v1.catalog.model.CatalogService
-
+import com.lightbend.lagom.javadsl.api.Descriptor.Call
 import com.lightbend.lagom.javadsl.api.ServiceLocator
 
 class ConsulServiceLocator @Inject()(client: ConsulClient, config: ConsulConfig)(implicit ec: ExecutionContext) extends ServiceLocator {
 
   private val roundRobinIndexFor: Map[String, Int] = TrieMap.empty[String, Int]
 
-  override def locate(name: String): CompletionStage[Optional[URI]] =
-    locateAsScala(name).map(_.asJava).toJava
+  val service = new NewService
+  service.setId(config.serviceId)
+  service.setName(config.serviceName)
+  service.setPort(config.servicePort)
+  service.setAddress(config.serviceAddress)
+  new ConsulClient(config.agentHostname).agentServiceRegister(service)
 
-  override def doWithService[T](name: String, block: JFunction[URI, CompletionStage[T]]): CompletionStage[Optional[T]] =
+
+  override def doWithService[T](name: String, serviceCall: Call[_, _], block: JFunction[URI, CompletionStage[T]]): CompletionStage[Optional[T]] =
     locateAsScala(name).flatMap { uriOpt =>
       uriOpt.fold(Future.successful(Optional.empty[T])) { uri =>
         block.apply(uri).toScala.map(Optional.of(_))
       }
     }.toJava
+
+  override def locate(name: String, serviceCall: Call[_, _]): CompletionStage[Optional[URI]] = locateAsScala(name).map(_.asJava).toJava
+
 
   private def locateAsScala(name: String): Future[Option[URI]] = Future {
     val instances = client.getCatalogService(name, QueryParams.DEFAULT).getValue.asScala.toList
@@ -42,8 +50,8 @@ class ConsulServiceLocator @Inject()(client: ConsulClient, config: ConsulConfig)
       case 1 => toURIs(instances).headOption
       case _ =>
         config.routingPolicy match {
-          case First      => Some(pickFirstInstance(instances))
-          case Random     => Some(pickRandomInstance(instances))
+          case First => Some(pickFirstInstance(instances))
+          case Random => Some(pickRandomInstance(instances))
           case RoundRobin => Some(pickRoundRobinInstance(name, instances))
         }
     }
