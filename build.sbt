@@ -4,13 +4,13 @@ organization := "com.lightbend.lagom"
 
 name := "lagom-service-locator-consul"
 
-val lagomVersion = "1.3.5"
+val lagomVersion = "1.3.10"
 
 val typesafeConfig = "com.typesafe" % "config" % "1.3.1"
 val lagomJavadslClient = "com.lightbend.lagom" %% "lagom-javadsl-client" % lagomVersion
 val lagomScaladslClient = "com.lightbend.lagom" %% "lagom-scaladsl-client" % lagomVersion
-val consulApi = "com.ecwid.consul" % "consul-api" % "1.1.10"
-val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % Test
+val consulApi = "com.ecwid.consul" % "consul-api" % "1.3.0"
+val scalatest = "org.scalatest" %% "scalatest" % "3.0.4" % Test
 
 lazy val `lagom-service-locator-consul` = (project in file("."))
   .aggregate(
