@@ -1,13 +1,14 @@
 package com.lightbend.lagom.scaladsl.discovery.consul
 
-import java.net.{ InetAddress, URI }
+import java.net.{InetAddress, URI}
 
 import com.ecwid.consul.v1.agent.model.NewService
-import com.ecwid.consul.v1.{ ConsulClient, QueryParams }
+import com.ecwid.consul.v1.{ConsulClient, QueryParams}
 import com.lightbend.lagom.internal.client.CircuitBreakers
+import com.lightbend.lagom.scaladsl.client.CircuitBreakersPanel
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{ Matchers, WordSpecLike }
-import play.api.{ Configuration, Environment }
+import org.scalatest.{Matchers, WordSpecLike}
+import play.api.{Configuration, Environment}
 
 import scala.collection.JavaConverters._
 
@@ -20,8 +21,7 @@ class ConsulServiceDiscoverySpec extends WordSpecLike with Matchers with ScalaFu
   def withServiceDiscovery(testCode: ConsulServiceLocator => ConsulClient => Any): Unit = {
     import scala.concurrent.ExecutionContext.Implicits._
     val client = new ConsulClient("localhost")
-    val cbs: CircuitBreakers = new CircuitBreakers(null, null, null)
-    val locator = new ConsulServiceLocator(client, new ConsulConfig.ConsulConfigImpl(config), cbs)
+    val locator = new ConsulServiceLocator(client, new ConsulConfig.ConsulConfigImpl(config), null)
     testCode(locator)(client)
   }
 

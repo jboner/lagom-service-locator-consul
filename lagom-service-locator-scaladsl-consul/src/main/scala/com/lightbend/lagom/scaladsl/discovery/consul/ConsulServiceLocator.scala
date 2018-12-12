@@ -1,19 +1,18 @@
 package com.lightbend.lagom.scaladsl.discovery.consul
 
-import java.net.{ InetAddress, URI }
+import java.net.{InetAddress, URI}
 import java.util.concurrent.ThreadLocalRandom
 
 import com.ecwid.consul.v1.catalog.model.CatalogService
-import com.ecwid.consul.v1.{ ConsulClient, QueryParams }
-import com.lightbend.lagom.internal.client.CircuitBreakers
+import com.ecwid.consul.v1.{ConsulClient, QueryParams}
 import com.lightbend.lagom.scaladsl.api.Descriptor
-import com.lightbend.lagom.scaladsl.client.CircuitBreakingServiceLocator
+import com.lightbend.lagom.scaladsl.client.{CircuitBreakersPanel, CircuitBreakingServiceLocator}
 
 import scala.collection.JavaConverters._
-import scala.collection.concurrent.{ Map, TrieMap }
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.collection.concurrent.{Map, TrieMap}
+import scala.concurrent.{ExecutionContext, Future}
 
-class ConsulServiceLocator(client: ConsulClient, config: ConsulConfig, circuitBreakers: CircuitBreakers)(implicit ec: ExecutionContext)
+class ConsulServiceLocator(client: ConsulClient, config: ConsulConfig, circuitBreakers: CircuitBreakersPanel)(implicit ec: ExecutionContext)
   extends CircuitBreakingServiceLocator(circuitBreakers) {
 
   private val roundRobinIndexFor: Map[String, Int] = TrieMap.empty[String, Int]
