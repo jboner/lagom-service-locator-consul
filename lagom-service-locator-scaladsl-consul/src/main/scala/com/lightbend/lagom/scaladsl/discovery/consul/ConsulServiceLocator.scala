@@ -39,7 +39,7 @@ class ConsulServiceLocator(client: ConsulClient, config: ConsulConfig, circuitBr
 
   private[consul] def pickFirstInstance(services: List[CatalogService]): URI = {
     if (services.isEmpty) throw new IllegalStateException("List of services should not be empty")
-    toURIs(services).sorted.head
+    toURIs(services).min
   }
 
   private[consul] def pickRandomInstance(services: List[CatalogService]): URI = {
