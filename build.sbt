@@ -13,7 +13,7 @@ lazy val `lagom-service-locator-consul` = (project in file("."))
   )
 
 organization in ThisBuild := "com.lightbend.lagom"
-version in ThisBuild := "1.4.0-SNAPSHOT"
+version in ThisBuild := "1.5.0"
 scalaVersion in ThisBuild := "2.12.7"
 credentials in ThisBuild += Credentials(Path.userHome / ".ivy2" / "gv-credentials")
 publishTo in ThisBuild := Some("Getvisibility artefacts" at "https://registry2.getvisibility.com/artifactory/ivy-dev/")
